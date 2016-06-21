@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        applicationId "org.blockstack.blockstack_client_demo_app"
+        applicationId "org.blockstack.blockstackdemo"
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1

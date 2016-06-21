@@ -1,4 +1,4 @@
-package org.blockstack.blockstack_client_demo_app;
+package org.blockstack.blockstackdemo;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

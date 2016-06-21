@@ -1,4 +1,4 @@
-package org.blockstack.blockstack_client_demo_app;
+package org.blockstack.client;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
