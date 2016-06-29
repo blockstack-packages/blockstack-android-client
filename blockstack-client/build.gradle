@@ -1,12 +1,36 @@
 apply plugin: 'com.android.library'
 
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'blockstack-client'
+
+    publishedGroupId = 'org.blockstack.client'
+    libraryName = 'blockstack-client'
+    artifact = 'blockstack-client'
+
+    libraryDescription = 'Android client for blockstack-server.'
+
+    siteUrl = 'https://github.com/blockstack/blockstack-android-client'
+    gitUrl = 'https://github.com/blockstack/blockstack-android-client.git'
+
+    libraryVersion = '1.0'
+
+    developerId = 'itsProf'
+    developerName = 'Jorge Tapia'
+    developerEmail = 'jorge@profapps.co'
+
+    licenseName = 'MIT'
+    licenseUrl = 'https://github.com/blockstack/blockstack-android-client/blob/master/LICENSE'
+    allLicenses = ["MIT"]
+}
+
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.0"
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 1
         versionName "1.0"
     }
@@ -21,5 +45,8 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.android.support:appcompat-v7:24.0.0'
 }
+
+apply from: 'https://raw.githubusercontent.com/numetriclabz/jcenter/master/installv.gradle'
+apply from: 'https://raw.githubusercontent.com/numetriclabz/jcenter/master/bintrayv.gradle'
