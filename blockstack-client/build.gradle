@@ -48,5 +48,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.0.0'
 }
 
-apply from: 'https://raw.githubusercontent.com/numetriclabz/jcenter/master/installv.gradle'
-apply from: 'https://raw.githubusercontent.com/numetriclabz/jcenter/master/bintrayv.gradle'
+apply from: 'https://raw.githubusercontent.com/blockstack/blockstack-android-client/master/installv.gradle'
+apply from: 'https://raw.githubusercontent.com/blockstack/blockstack-android-client/master/bintrayv.gradle'
