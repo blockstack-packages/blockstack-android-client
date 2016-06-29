@@ -15,7 +15,7 @@ ext {
 
     libraryVersion = '1.0'
 
-    developerId = 'itsProf'
+    developerId = 'itsprof'
     developerName = 'Jorge Tapia'
     developerEmail = 'jorge@profapps.co'
 
