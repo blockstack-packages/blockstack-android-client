@@ -1,15 +1,27 @@
 package org.blockstack.client;
 
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
+import android.util.Log;
+
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
- * The Blockstack <code>class</code> provides methods to interact with the blockstack-server.
- * Copy
+ * The Blockstack <code>class</code> provides Android apps with methods to interact
+ * with the blockstack-server.
  *
  * @author  Jorge Tapia (@itsProf)
  * @version 1.0
  */
+// TODO: implement missing operations
 public class Blockstack {
+    private static final String TAG = Blockstack.class.getSimpleName();
     private static String mAppId;
     private static String mAppSecret;
 
@@ -21,8 +33,8 @@ public class Blockstack {
     /**
      * Initializes the Blockstack client for Android.
      *
-     * @param appId the app id obtained from the Onename API.
-     * @param appSecret the app secret obtained from the Onename API.
+     * @param appId app id obtained from <a href="https://api.onename.com">Onename API</a>.
+     * @param appSecret app secret obtained from <a href="https://api.onename.com">Onename API</a>.
      */
     public static void initialize(@NonNull String appId, @NonNull String appSecret) {
         mAppId = appId;
@@ -37,4 +49,66 @@ public class Blockstack {
     private static boolean isValid() {
         return mAppId != null && mAppSecret != null;
     }
+
+    // region User operations
+    public static JSONObject lookup(@NonNull String[] users) {
+        if (isValid()) {
+            String lookupUsers = TextUtils.join(",", users);
+            String lookupUrl = String.format("%s/%s", Endpoints.USERS, lookupUsers);
+
+            return call(lookupUrl);
+        } else {
+            Log.e(TAG, "Client is not valid. Did you forget to initialize the client?");
+            return null;
+        }
+    }
+    // endregion
+
+    // region Networking
+    /**
+     * Calls a blockstack-server endpoint.
+     *
+     * @return a <code>JSONObject</code> with the blockstack-server response.
+     */
+    private static JSONObject call(@NonNull String endpointUrl) {
+        if (true) {
+            Log.e(TAG, "The endpoint has to match one of the defined endpoints in Endpoints.java");
+            return null;
+        }
+
+        BufferedReader reader = null;
+        HttpURLConnection urlConnection = null;
+
+        try {
+            URL url = new URL(endpointUrl);
+            urlConnection = (HttpURLConnection) url.openConnection();
+
+            StringBuilder stringBuilder = new StringBuilder();
+            reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+
+            return new JSONObject(stringBuilder.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+        }
+    }
+    // TODO: implement POST
+    // endregion
 }
