@@ -53,7 +53,7 @@ public class Blockstack {
     // region User operations
     public static JSONObject lookup(@NonNull String[] users) {
         if (isValid()) {
-            String lookupUsers = TextUtils.join(",", users);
+            String lookupUsers = TextUtils.join(",", users).replaceAll(" ", "").trim();
             String lookupUrl = String.format("%s/%s", Endpoints.USERS, lookupUsers);
 
             return call(lookupUrl);
@@ -71,11 +71,6 @@ public class Blockstack {
      * @return a <code>JSONObject</code> with the blockstack-server response.
      */
     private static JSONObject call(@NonNull String endpointUrl) {
-        if (true) {
-            Log.e(TAG, "The endpoint has to match one of the defined endpoints in Endpoints.java");
-            return null;
-        }
-
         BufferedReader reader = null;
         HttpURLConnection urlConnection = null;
 

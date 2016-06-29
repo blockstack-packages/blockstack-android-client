@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">Blockstack Demo</string>
+    <string name="app_name">Blockstack</string>
+    <string name="users">Users</string>
+    <string name="look_up_users">Look up users</string>
+    <string name="search_users">Search users</string>
+    <string name="usernames_comma_separated">Usernames... (comma separated)</string>
+    <string name="search_button">Search button</string>
 </resources>
