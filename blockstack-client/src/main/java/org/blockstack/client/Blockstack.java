@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 /**
  * The Blockstack <code>class</code> provides Android apps with methods to interact
@@ -51,9 +52,16 @@ public class Blockstack {
     }
 
     // region User operations
-    public static JSONObject lookup(@NonNull String[] users) {
+
+    /**
+     * Looks up the data for one or more users by their usernames.
+     *
+     * @param usernames the usernames(s) to look up.
+     * @return a <code>JSONObject</code> with a response, error or <code>null</code>.
+     */
+    public static JSONObject lookup(@NonNull String[] usernames) {
         if (isValid()) {
-            String lookupUsers = TextUtils.join(",", users).replaceAll(" ", "").trim();
+            String lookupUsers = URLEncoder.encode(TextUtils.join(",", usernames).trim());
             String lookupUrl = String.format("%s/%s", Endpoints.USERS, lookupUsers);
 
             return call(lookupUrl);
@@ -61,6 +69,22 @@ public class Blockstack {
             Log.e(TAG, "Client is not valid. Did you forget to initialize the client?");
             return null;
         }
+    }
+
+    /**
+     * Takes in a search query and returns a list of results that match the search.
+     * The query is matched against +usernames, full names, and twitter handles by default.
+     * It's also possible to explicitly search verified Twitter, Facebook, Github accounts,
+     * and verified domains.
+     * This can be done by using search queries like twitter:itsProf, facebook:g3lepage,
+     * github:shea256, domain:muneebali.com
+     *
+     * @param query the text to search for.
+     * @return a <code>JSONObject</code> with a response, error or <code>null</code>.
+     */
+    public static JSONObject search(@NonNull String query) {
+        String searchUrl = String.format("%s%s", Endpoints.SEARCH, URLEncoder.encode(query));
+        return call(searchUrl);
     }
     // endregion
 
