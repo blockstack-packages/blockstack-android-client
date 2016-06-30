@@ -20,7 +20,6 @@ import java.net.URLEncoder;
  * @author  Jorge Tapia (@itsProf)
  * @version 1.0
  */
-// TODO: implement missing operations
 public class Blockstack {
     private static final String TAG = Blockstack.class.getSimpleName();
     private static String mAppId;
@@ -52,12 +51,11 @@ public class Blockstack {
     }
 
     // region User operations
-
     /**
      * Looks up the data for one or more users by their usernames.
      *
      * @param usernames the usernames(s) to look up.
-     * @return a <code>JSONObject</code> with a response, error or <code>null</code>.
+     * @return a <code>JSONObject</code> with a response.
      */
     public static JSONObject lookup(@NonNull String[] usernames) {
         if (isValid()) {
@@ -75,16 +73,47 @@ public class Blockstack {
      * Takes in a search query and returns a list of results that match the search.
      * The query is matched against +usernames, full names, and twitter handles by default.
      * It's also possible to explicitly search verified Twitter, Facebook, Github accounts,
-     * and verified domains.
-     * This can be done by using search queries like twitter:itsProf, facebook:g3lepage,
-     * github:shea256, domain:muneebali.com
+     * and verified domains. This can be done by using search queries like twitter:itsProf,
+     * facebook:g3lepage, github:shea256, domain:muneebali.com
      *
      * @param query the text to search for.
-     * @return a <code>JSONObject</code> with a response, error or <code>null</code>.
+     * @return a <code>JSONObject</code> with a response.
      */
     public static JSONObject search(@NonNull String query) {
         String searchUrl = String.format("%s%s", Endpoints.SEARCH, URLEncoder.encode(query));
         return call(searchUrl);
+    }
+    // endregion
+
+    // region Address operations
+    /**
+     * Retrieves the unspent outputs for a given address so they can be used
+     * for building transactions.
+     *
+     * @param address the address to look up unspent outputs for.
+     * @return a <code>JSONObject</code> with a response.
+     */
+    public static JSONObject getUnspentOutputs(@NonNull String address) {
+        String unspentOutputsUrl = String.format("%s/%s/unspents", Endpoints.ADDRESSES, address);
+        return call(unspentOutputsUrl);
+    }
+
+    /**
+     * Retrieves a list of names owned by the address provided.
+     *
+     * @param address the address to look up names owned by.
+     * @return a <code>JSONObject</code> with a response.
+     */
+    public static JSONObject getNamesOwnedByAddress(@NonNull String address) {
+        String namesOwnedUrl = String.format("%s/%s/names", Endpoints.ADDRESSES, address);
+        return call(namesOwnedUrl);
+    }
+    // endregion
+
+    // region Domain operations
+    public JSONObject getDkimPublicKey(@NonNull String domain) {
+        String dkimPublicKeyUrl = String.format("%s/%s/dkim", Endpoints.DOMAINS, domain);
+        return call(dkimPublicKeyUrl);
     }
     // endregion
 
