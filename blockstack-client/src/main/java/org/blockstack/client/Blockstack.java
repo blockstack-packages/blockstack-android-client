@@ -4,8 +4,6 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,26 +17,22 @@ import java.net.URLEncoder;
  *
  * @author  Jorge Tapia (@itsProf)
  * @version 1.0
+ * @see <a href="http://blockstack.org">Blockstack</a>
  */
 public class Blockstack {
     private static final String TAG = Blockstack.class.getSimpleName();
-    private static String mAppId;
-    private static String mAppSecret;
+    private String appId;
+    private String appSecret;
 
     /**
-     * Prevents default class instantiation.
-     */
-    private Blockstack() {}
-
-    /**
-     * Initializes the Blockstack client for Android.
+     * Instantiates the Blockstack client for Android.
      *
      * @param appId app id obtained from <a href="https://api.onename.com">Onename API</a>.
      * @param appSecret app secret obtained from <a href="https://api.onename.com">Onename API</a>.
      */
-    public static void initialize(@NonNull String appId, @NonNull String appSecret) {
-        mAppId = appId;
-        mAppSecret = appSecret;
+    public Blockstack(@NonNull String appId, @NonNull String appSecret) {
+        this.appId = appId;
+        this.appSecret = appSecret;
     }
 
     /**
@@ -46,8 +40,8 @@ public class Blockstack {
      *
      * @return a boolean value indicating wether the client is valid or not.
      */
-    private static boolean isValid() {
-        return mAppId != null && mAppSecret != null;
+    private boolean isValid() {
+        return appId != null && appSecret != null;
     }
 
     // region User operations
@@ -57,12 +51,12 @@ public class Blockstack {
      * @param usernames the usernames(s) to look up.
      * @return a <code>JSONObject</code> with a response.
      */
-    public static JSONObject lookup(@NonNull String[] usernames) {
+    public String lookup(@NonNull String[] usernames) {
         if (isValid()) {
             String lookupUsers = URLEncoder.encode(TextUtils.join(",", usernames).trim());
             String lookupUrl = String.format("%s/%s", Endpoints.USERS, lookupUsers);
 
-            return call(lookupUrl);
+            return getEndpoint(lookupUrl);
         } else {
             Log.e(TAG, "Client is not valid. Did you forget to initialize the client?");
             return null;
@@ -79,9 +73,9 @@ public class Blockstack {
      * @param query the text to search for.
      * @return a <code>JSONObject</code> with a response.
      */
-    public static JSONObject search(@NonNull String query) {
+    public String search(@NonNull String query) {
         String searchUrl = String.format("%s%s", Endpoints.SEARCH, URLEncoder.encode(query));
-        return call(searchUrl);
+        return getEndpoint(searchUrl);
     }
     // endregion
 
@@ -93,9 +87,9 @@ public class Blockstack {
      * @param address the address to look up unspent outputs for.
      * @return a <code>JSONObject</code> with a response.
      */
-    public static JSONObject getUnspentOutputs(@NonNull String address) {
+    public String getUnspentOutputs(@NonNull String address) {
         String unspentOutputsUrl = String.format("%s/%s/unspents", Endpoints.ADDRESSES, address);
-        return call(unspentOutputsUrl);
+        return getEndpoint(unspentOutputsUrl);
     }
 
     /**
@@ -104,16 +98,16 @@ public class Blockstack {
      * @param address the address to look up names owned by.
      * @return a <code>JSONObject</code> with a response.
      */
-    public static JSONObject getNamesOwnedByAddress(@NonNull String address) {
+    public String getNamesOwnedByAddress(@NonNull String address) {
         String namesOwnedUrl = String.format("%s/%s/names", Endpoints.ADDRESSES, address);
-        return call(namesOwnedUrl);
+        return getEndpoint(namesOwnedUrl);
     }
     // endregion
 
     // region Domain operations
-    public JSONObject getDkimPublicKey(@NonNull String domain) {
+    public String getDkimPublicKey(@NonNull String domain) {
         String dkimPublicKeyUrl = String.format("%s/%s/dkim", Endpoints.DOMAINS, domain);
-        return call(dkimPublicKeyUrl);
+        return getEndpoint(dkimPublicKeyUrl);
     }
     // endregion
 
@@ -121,9 +115,9 @@ public class Blockstack {
     /**
      * Calls a blockstack-server endpoint.
      *
-     * @return a <code>JSONObject</code> with the blockstack-server response.
+     * @return a JSON <code>String</code> with the blockstack-server response.
      */
-    private static JSONObject call(@NonNull String endpointUrl) {
+    private String getEndpoint(@NonNull String endpointUrl) {
         BufferedReader reader = null;
         HttpURLConnection urlConnection = null;
 
@@ -139,7 +133,7 @@ public class Blockstack {
                 stringBuilder.append(line);
             }
 
-            return new JSONObject(stringBuilder.toString());
+            return stringBuilder.toString();
         } catch (Exception e) {
             e.printStackTrace();
             return null;

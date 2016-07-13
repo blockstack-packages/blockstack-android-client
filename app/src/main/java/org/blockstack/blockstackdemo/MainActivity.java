@@ -6,16 +6,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import org.blockstack.client.Blockstack;
-
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Blockstack.initialize("YOUR_APP_ID", "YOUR_APP_SECRET");
         setupUI();
     }
 

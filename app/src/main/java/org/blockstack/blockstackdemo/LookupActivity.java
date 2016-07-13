@@ -31,7 +31,7 @@ public class LookupActivity extends AppCompatActivity implements TextWatcher {
     EditText usersEditText;
     ImageButton searchButton;
     ListView listView;
-    HashMap<String, JSONObject> data = new HashMap<>();
+    HashMap<String, String> data = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +105,8 @@ public class LookupActivity extends AppCompatActivity implements TextWatcher {
     // endregion
 
     // region Lookup task
-    private class LookupTask extends AsyncTask<String[], Void, JSONObject> {
+    private class LookupTask extends AsyncTask<String[], Void, String> {
+        Blockstack client = new Blockstack("YOUR_APP_ID", "YOUR_APP_SECRET");
         Context context;
         ProgressDialog dialog;
         String[] users;
@@ -130,46 +131,49 @@ public class LookupActivity extends AppCompatActivity implements TextWatcher {
         }
 
         @Override
-        protected JSONObject doInBackground(String[]... params) {
+        protected String doInBackground(String[]... params) {
             users = TextUtils.join(",", params[0]).replaceAll(" ", "").split(",");
-            return Blockstack.lookup(users);
+            return client.lookup(users);
         }
 
         @Override
-        protected void onPostExecute(JSONObject response) {
+        protected void onPostExecute(String response) {
             if (response != null) {
-                for (String user : users) {
-                    try {
-                        JSONObject userObject = response.getJSONObject(user);
+                try {
+                    JSONObject json = new JSONObject(response);
 
-                        if (userObject.has("error")) {
+                    for (String user: users) {
+                        JSONObject jsonUser = json.getJSONObject(user);
+
+                        if (jsonUser.has("error")) {
                             continue;
                         }
 
-                        data.put(user, userObject);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                        data.put(user, jsonUser.toString());
                     }
-                }
 
-                if (data.keySet().toArray().length > 0) {
-                    String[] keys = data.keySet().toArray(new String[data.keySet().size()]);
+                    if (data.keySet().toArray().length > 0) {
+                        String[] keys = data.keySet().toArray(new String[data.keySet().size()]);
 
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
-                            android.R.layout.simple_list_item_1, keys);
-                    listView.setAdapter(adapter);
-                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> adapterView, View view, int i,
-                                                long l) {
-                            String username = adapterView.getItemAtPosition(i).toString();
-                            Toast.makeText(LookupActivity.this, data.get(username).toString(),
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    });
-                } else {
-                    Toast.makeText(LookupActivity.this, "No users matching " + "\""
-                            + usersEditText.getText() + "\" were found.", Toast.LENGTH_LONG).show();
+                        ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
+                                android.R.layout.simple_list_item_1, keys);
+                        listView.setAdapter(adapter);
+                        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> adapterView, View view, int i,
+                                                    long l) {
+                                String username = adapterView.getItemAtPosition(i).toString();
+                                Toast.makeText(LookupActivity.this, data.get(username),
+                                        Toast.LENGTH_LONG).show();
+
+                            }
+                        });
+                    } else {
+                        Toast.makeText(LookupActivity.this, "No users matching " + "\""
+                                + usersEditText.getText() + "\" were found.", Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             } else {
                 Toast.makeText(LookupActivity.this, "There was error executing your request...",
