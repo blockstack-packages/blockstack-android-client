@@ -4,10 +4,15 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 
@@ -17,7 +22,7 @@ import java.net.URLEncoder;
  *
  * @author  Jorge Tapia (@itsProf)
  * @version 1.0
- * @see <a href="http://blockstack.org">Blockstack</a>
+ * @see <a href="http://blockstack.org">Blockstack Website</a>
  */
 public class Blockstack {
     private static final String TAG = Blockstack.class.getSimpleName();
@@ -49,14 +54,14 @@ public class Blockstack {
      * Looks up the data for one or more users by their usernames.
      *
      * @param usernames the usernames(s) to look up.
-     * @return a <code>JSONObject</code> with a response.
+     * @return a Blockstack server response as a JSON <code>String</code>.
      */
-    public String lookup(@NonNull String[] usernames) {
+    public String lookupUsers(@NonNull String[] usernames) {
         if (isValid()) {
             String lookupUsers = URLEncoder.encode(TextUtils.join(",", usernames).trim());
             String lookupUrl = String.format("%s/%s", Endpoints.USERS, lookupUsers);
 
-            return getEndpoint(lookupUrl);
+            return executeGET(lookupUrl);
         } else {
             Log.e(TAG, "Client is not valid. Did you forget to initialize the client?");
             return null;
@@ -64,18 +69,76 @@ public class Blockstack {
     }
 
     /**
-     * Takes in a search query and returns a list of results that match the search.
+     * Takes in a searchUsers query and returns a list of results that match the searchUsers.
      * The query is matched against +usernames, full names, and twitter handles by default.
-     * It's also possible to explicitly search verified Twitter, Facebook, Github accounts,
-     * and verified domains. This can be done by using search queries like twitter:itsProf,
+     * It's also possible to explicitly searchUsers verified Twitter, Facebook, Github accounts,
+     * and verified domains. This can be done by using searchUsers queries like twitter:itsProf,
      * facebook:g3lepage, github:shea256, domain:muneebali.com
      *
-     * @param query the text to search for.
-     * @return a <code>JSONObject</code> with a response.
+     * @param query the text to searchUsers for.
+     * @return a Blockstack server response as a JSON <code>String</code>.
      */
-    public String search(@NonNull String query) {
+    public String searchUsers(@NonNull String query) {
         String searchUrl = String.format("%s%s", Endpoints.SEARCH, URLEncoder.encode(query));
-        return getEndpoint(searchUrl);
+        return executeGET(searchUrl);
+    }
+
+    /**
+     * Registers a username.
+     *
+     * @param username the username to be registered.
+     * @param recipientAddress Bitcoin address of the new owner address.
+     * @param ownerPublicKey public key of the Bitcoin address that currently owns the username.
+     * @return response with an object with a status that is either "success" or "error".
+     */
+    public String registerUser(@NonNull String username, @NonNull String recipientAddress,
+                               @NonNull String ownerPublicKey) {
+        throw new UnsupportedOperationException("Method not yet implemented");
+    }
+
+    /**
+     * Updates a user.
+     *
+     * @param username the username to be updated.
+     * @param profileData a <code>JSONObject</code> object with profile data that should be
+     *                    associated with the username.
+     * @param ownerPublicKey public key of the Bitcoin address that currently owns the username.
+     * @return a response that could include an object with an unsigned transaction "unsigned_tx"
+     *          in hex format.
+     */
+    public String updateUser(@NonNull String username, @NonNull JSONObject profileData,
+                               @NonNull String ownerPublicKey) {
+        throw new UnsupportedOperationException("Method not yet implemented");
+    }
+
+    /**
+     * Transfers a user to another Bitcoin address.
+     *
+     * @param username the username to be transfered.
+     * @param transferAddress Bitcoin address of the new owner address.
+     * @param ownerPublicKey public key of the Bitcoin address that currently owns the username.
+     * @return a response that could include an object with an unsigned transaction "unsigned_tx"
+     *          in hex format.
+     */
+    public String transferUser(@NonNull String username, @NonNull String transferAddress,
+                         @NonNull String ownerPublicKey) {
+        throw new UnsupportedOperationException("Method not yet implemented");
+    }
+    // endregion
+
+    // region Transaction operations
+
+    /**
+     * Takes in a signed transaction (in hex format) and broadcasts it to the network.
+     * If the transaction is successfully broadcasted, the transaction hash is returned
+     * in the response.
+     *
+     * @param signedTransaction a signed transaction in hex format.
+     * @return a Blockstack server response as a JSON <code>String</code> with a status that is
+     *          either "success" or "error".
+     */
+    public String broadcastTransaction(@NonNull String signedTransaction) {
+        throw new UnsupportedOperationException("Method not yet implemented");
     }
     // endregion
 
@@ -85,39 +148,40 @@ public class Blockstack {
      * for building transactions.
      *
      * @param address the address to look up unspent outputs for.
-     * @return a <code>JSONObject</code> with a response.
+     * @return a Blockstack server response as a JSON <code>String</code>.
      */
     public String getUnspentOutputs(@NonNull String address) {
         String unspentOutputsUrl = String.format("%s/%s/unspents", Endpoints.ADDRESSES, address);
-        return getEndpoint(unspentOutputsUrl);
+        return executeGET(unspentOutputsUrl);
     }
 
     /**
      * Retrieves a list of names owned by the address provided.
      *
      * @param address the address to look up names owned by.
-     * @return a <code>JSONObject</code> with a response.
+     * @return a Blockstack server response as a JSON <code>String</code>.
      */
     public String getNamesOwnedByAddress(@NonNull String address) {
         String namesOwnedUrl = String.format("%s/%s/names", Endpoints.ADDRESSES, address);
-        return getEndpoint(namesOwnedUrl);
+        return executeGET(namesOwnedUrl);
     }
     // endregion
 
     // region Domain operations
     public String getDkimPublicKey(@NonNull String domain) {
         String dkimPublicKeyUrl = String.format("%s/%s/dkim", Endpoints.DOMAINS, domain);
-        return getEndpoint(dkimPublicKeyUrl);
+        return executeGET(dkimPublicKeyUrl);
     }
     // endregion
 
     // region Networking
     /**
-     * Calls a blockstack-server endpoint.
+     * Calls a blockstack-server endpoint using the GET method.
      *
-     * @return a JSON <code>String</code> with the blockstack-server response.
+     * @param endpointUrl the Blockstack server endpoint URL.
+     * @return a Blockstack server response as a JSON <code>String</code>.
      */
-    private String getEndpoint(@NonNull String endpointUrl) {
+    private String executeGET(@NonNull String endpointUrl) {
         BufferedReader reader = null;
         HttpURLConnection urlConnection = null;
 
@@ -134,7 +198,10 @@ public class Blockstack {
             }
 
             return stringBuilder.toString();
-        } catch (Exception e) {
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
             e.printStackTrace();
             return null;
         } finally {
@@ -151,6 +218,56 @@ public class Blockstack {
             }
         }
     }
-    // TODO: implement POST
+
+    /**
+     * Calls a blockstack-server endpoint using the POST method.
+     *
+     * @param endpointUrl the Blockstack server endpoint URL.
+     * @param data the JSON data to send via POST.
+     * @return a Blockstack server response as a JSON <code>String</code>.
+     */
+    private String executePOST(@NonNull String endpointUrl, @NonNull JSONObject data) {
+        BufferedReader reader = null;
+        HttpURLConnection urlConnection = null;
+        OutputStreamWriter writer = null;
+
+        try {
+            urlConnection.setDoOutput(true);
+            urlConnection.setDoInput(true);
+            urlConnection.setRequestProperty("Content-Type", "application/json");
+            urlConnection.setRequestMethod("POST");
+
+            writer = new OutputStreamWriter(urlConnection.getOutputStream());
+            writer.write(data.toString());
+
+            StringBuilder stringBuilder = new StringBuilder();
+            reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+
+            return stringBuilder.toString();
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+            return  null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+        }
+    }
     // endregion
 }

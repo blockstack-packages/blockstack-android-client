@@ -13,6 +13,10 @@ public class Endpoints {
     public static final String SEARCH = "https://api.onename.com/v1/search?query=";
     // endregion
 
+    // region Transaction endpoints
+    public static final String TRANSACTIONS = "https://api.onename.com/v1/transactions";
+    // endregion
+
     // region Address endpoints
     public static final String ADDRESSES = "https://api.onename.com/v1/addresses";
     // endregion

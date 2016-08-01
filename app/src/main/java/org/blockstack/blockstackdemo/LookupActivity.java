@@ -133,7 +133,7 @@ public class LookupActivity extends AppCompatActivity implements TextWatcher {
         @Override
         protected String doInBackground(String[]... params) {
             users = TextUtils.join(",", params[0]).replaceAll(" ", "").split(",");
-            return client.lookup(users);
+            return client.lookupUsers(users);
         }
 
         @Override
