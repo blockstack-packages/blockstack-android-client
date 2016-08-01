@@ -2,8 +2,8 @@ package org.blockstack.client;
 
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
-import android.util.Log;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -40,15 +40,6 @@ public class Blockstack {
         this.appSecret = appSecret;
     }
 
-    /**
-     * Determines if the app id and app secret are set and valid.
-     *
-     * @return a boolean value indicating wether the client is valid or not.
-     */
-    private boolean isValid() {
-        return appId != null && appSecret != null;
-    }
-
     // region User operations
     /**
      * Looks up the data for one or more users by their usernames.
@@ -57,15 +48,10 @@ public class Blockstack {
      * @return a Blockstack server response as a JSON <code>String</code>.
      */
     public String lookupUsers(@NonNull String[] usernames) {
-        if (isValid()) {
-            String lookupUsers = URLEncoder.encode(TextUtils.join(",", usernames).trim());
-            String lookupUrl = String.format("%s/%s", Endpoints.USERS, lookupUsers);
+        String lookupUsers = URLEncoder.encode(TextUtils.join(",", usernames).trim());
+        String lookupUrl = String.format("%s/%s", Endpoints.USERS, lookupUsers);
 
-            return executeGET(lookupUrl);
-        } else {
-            Log.e(TAG, "Client is not valid. Did you forget to initialize the client?");
-            return null;
-        }
+        return executeGET(lookupUrl);
     }
 
     /**
@@ -88,12 +74,25 @@ public class Blockstack {
      *
      * @param username the username to be registered.
      * @param recipientAddress Bitcoin address of the new owner address.
-     * @param ownerPublicKey public key of the Bitcoin address that currently owns the username.
+     * @param profileData public key of the Bitcoin address that currently owns the username.
      * @return response with an object with a status that is either "success" or "error".
      */
     public String registerUser(@NonNull String username, @NonNull String recipientAddress,
-                               @NonNull String ownerPublicKey) {
-        throw new UnsupportedOperationException("Method not yet implemented");
+                               JSONObject profileData) {
+        JSONObject data = new JSONObject();
+
+        try {
+            data.put("username", username);
+            data.put("recipient_address", recipientAddress);
+
+            if (profileData != null) {
+                data.put("profile", profileData);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return executePOST(Endpoints.USERS, data);
     }
 
     /**
@@ -108,7 +107,17 @@ public class Blockstack {
      */
     public String updateUser(@NonNull String username, @NonNull JSONObject profileData,
                                @NonNull String ownerPublicKey) {
-        throw new UnsupportedOperationException("Method not yet implemented");
+        String updateUrl = String.format("%s/%s/update", Endpoints.USERS, username);
+        JSONObject data = new JSONObject();
+
+        try {
+            data.put("profile", profileData);
+            data.put("owner_pubkey", ownerPublicKey);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return executePOST(updateUrl, data);
     }
 
     /**
@@ -122,7 +131,17 @@ public class Blockstack {
      */
     public String transferUser(@NonNull String username, @NonNull String transferAddress,
                          @NonNull String ownerPublicKey) {
-        throw new UnsupportedOperationException("Method not yet implemented");
+        String transferUrl = String.format("%s/%s/update", Endpoints.USERS, username);
+        JSONObject data = new JSONObject();
+
+        try {
+            data.put("transfer_address", transferAddress);
+            data.put("owner_pubkey", ownerPublicKey);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return executePOST(transferUrl, data);
     }
     // endregion
 
@@ -138,7 +157,15 @@ public class Blockstack {
      *          either "success" or "error".
      */
     public String broadcastTransaction(@NonNull String signedTransaction) {
-        throw new UnsupportedOperationException("Method not yet implemented");
+        JSONObject data = new JSONObject();
+
+        try {
+            data.put("signed_hex", signedTransaction);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return executePOST(Endpoints.TRANSACTIONS, data);
     }
     // endregion
 
