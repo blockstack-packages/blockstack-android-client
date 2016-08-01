@@ -28,6 +28,7 @@ new AsyncTask<Void, Void, String>() {
     protected String doInBackground(Void... params) {
         return blockstack.lookupUsers(new String[] {"itsProf"});
     }
+    
     protected void onPostExecute(String response) {
         Toast.makeText(MainActivity.this, response, Toast.LENGTH_LONG).show();
     }
