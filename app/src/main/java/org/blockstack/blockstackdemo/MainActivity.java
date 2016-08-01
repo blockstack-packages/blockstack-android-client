@@ -16,6 +16,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setupUI() {
+        setTitle(getString(R.string.blockstack_client_demo));
+
         Button lookupButton = (Button) findViewById(R.id.lookupButton);
         lookupButton.setOnClickListener(this);
     }
