@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -48,10 +49,16 @@ public class Blockstack {
      * @return a Blockstack server response as a JSON <code>String</code>.
      */
     public String lookupUsers(@NonNull String[] usernames) {
-        String lookupUsers = URLEncoder.encode(TextUtils.join(",", usernames).trim());
-        String lookupUrl = String.format("%s/%s", Endpoints.USERS, lookupUsers);
+        try {
+            String lookupUsers = URLEncoder.encode(TextUtils.join(",", usernames).trim(), "UTF-8");
+            String lookupUrl = String.format("%s/%s", Endpoints.USERS, lookupUsers);
 
-        return executeGET(lookupUrl);
+            return executeGET(lookupUrl);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     /**
@@ -123,7 +130,7 @@ public class Blockstack {
     /**
      * Transfers a user to another Bitcoin address.
      *
-     * @param username the username to be transfered.
+     * @param username the username to be transferred.
      * @param transferAddress Bitcoin address of the new owner address.
      * @param ownerPublicKey public key of the Bitcoin address that currently owns the username.
      * @return a response that could include an object with an unsigned transaction "unsigned_tx"
@@ -149,7 +156,7 @@ public class Blockstack {
 
     /**
      * Takes in a signed transaction (in hex format) and broadcasts it to the network.
-     * If the transaction is successfully broadcasted, the transaction hash is returned
+     * If the transaction is successfully broadcast, the transaction hash is returned
      * in the response.
      *
      * @param signedTransaction a signed transaction in hex format.
@@ -195,6 +202,13 @@ public class Blockstack {
     // endregion
 
     // region Domain operations
+    /**
+     * Retrieves a DKIM public key for given domain, using the
+     * "blockchainid._domainkey" subdomain DNS record.
+     *
+     * @param domain the domain to look the DKIM public key up.
+     * @return a Blockstack server response as a JSON <code>String</code>.
+     */
     public String getDkimPublicKey(@NonNull String domain) {
         String dkimPublicKeyUrl = String.format("%s/%s/dkim", Endpoints.DOMAINS, domain);
         return executeGET(dkimPublicKeyUrl);

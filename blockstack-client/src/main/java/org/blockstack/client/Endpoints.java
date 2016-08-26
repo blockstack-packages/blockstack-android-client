@@ -6,7 +6,6 @@ package org.blockstack.client;
  * @author  Jorge Tapia (@itsProf)
  * @version 1.0
  */
-// TODO: add missing endpoints
 public class Endpoints {
     // region User endpoints
     public static final String USERS = "https://api.onename.com/v1/users";
